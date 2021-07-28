@@ -100,29 +100,6 @@ function home_dir() {
     return empty($home) ? null : $home;
 }
 
-/**
- * Write error notification
- *
- * @param $text
- * @return void
- */
-function cli_problem($text) {
-    fwrite(STDERR, $text . "\n");
-}
-
-/**
- * Write to standard out and error with exit in error.
- *
- * @param string $text
- * @param int $errorcode
- * @return void (does not return)
- */
-function cli_error($text, $errorcode = 1) {
-    fwrite(STDERR, $text);
-    fwrite(STDERR, "\n");
-    die($errorcode);
-}
-
 function array_merge_recursive_distinct(array &$array1, array &$array2) {
     $merged = $array1;
 
@@ -161,7 +138,7 @@ function moosh_moodle_version($topdir, $default = 23) {
                 return '22';
             }
             $matches = array();
-            if (preg_match('/^\$branch\s+=\s+\'(\d\d)\'.*/', $line, $matches)) {
+            if (preg_match('/^\$branch\s+=\s+\'(\d+)\'.*/', $line, $matches)) {
                 return $matches[1];
             }
         }
@@ -345,8 +322,18 @@ function get_files($contextid) {
 
     $sql = 'SELECT f.id, f.contenthash, f.filesize FROM {files} f 
                 WHERE f.contextid = ? 
-
                 AND f.filesize > 0';
+    $param = array($contextid);
+    return $DB->get_records_sql($sql, $param);
+}
+
+function get_distinct_files($contextid) {
+    global $DB;
+
+    $sql = 'SELECT contenthash, filesize FROM {files}  
+                WHERE contextid = ? 
+                AND filesize > 0
+                GROUP BY contenthash, filesize';
     $param = array($contextid);
     return $DB->get_records_sql($sql, $param);
 }

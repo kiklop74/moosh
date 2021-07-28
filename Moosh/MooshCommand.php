@@ -48,6 +48,11 @@ class MooshCommand {
     public static $BOOTSTRAP_DB_ONLY = 4;
 
     /**
+     * @var int set CLI_SCRIPT and include config.php, don't check for admin
+     */
+    public static $BOOTSTRAP_FULL_NO_ADMIN_CHECK = 5;
+
+    /**
      * @var \GetOptionKit\OptionSpecCollection
      */
     public $spec;
@@ -426,6 +431,10 @@ class MooshCommand {
         if (!is_file($filepath)) {
             cli_error("'$filepath' is not a file");
         }
+        if (!is_readable($filepath)) {
+            cli_error("'$filepath' is not readable");
+        }
+
         return $filepath;
     }
 
@@ -440,6 +449,10 @@ class MooshCommand {
     protected function display($data, $json = false, $humanreadable=true) {
         if ($json) {
             echo json_encode($data);
+            return;
+        }
+
+        if(!$data) {
             return;
         }
 
